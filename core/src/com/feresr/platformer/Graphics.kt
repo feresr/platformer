@@ -1,6 +1,5 @@
 package com.feresr.platformer
 
-import apple.laf.JRSUIConstants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.GL20.GL_ONE_MINUS_SRC_ALPHA
@@ -131,8 +130,7 @@ class Graphics(private val width: Int, private val height: Int) {
     }
 
     fun render() {
-        Gdx.gl.glClearColor(.5f, .87f, 1f, 1f)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
         buffer.rewind()
         Gdx.gl.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, width, height,
                 GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, buffer)
