@@ -59,6 +59,8 @@ class Map(private val tiles: CharArray, val width: Int, val height: Int) {
     }
 
     fun getTile(x: Int, y: Int): Char {
+        val index = y * (width) + x
+        if (index < 0 || index >= tiles.size) return ' '
         return tiles[y * (width) + x]
     }
 }

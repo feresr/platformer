@@ -4,8 +4,8 @@ class CameraLayer(private val camera: Camera, width: Int, height: Int) : Graphic
 
     fun drawSprite(sprite: IntArray, w: Int, x: Float, y: Float, flipHorizontal: Boolean = false) {
         super.drawSprite(sprite, w,
-                (x - camera.offsetX).toInt(),
-                (y - camera.offsetY).toInt(),
+                x.toInt() - camera.offsetX.toInt(),
+                y.toInt() - camera.offsetY.toInt(),
                 flipHorizontal
         )
     }
