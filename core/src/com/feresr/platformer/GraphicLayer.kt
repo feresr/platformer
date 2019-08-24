@@ -13,7 +13,7 @@ import java.nio.FloatBuffer
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class Graphics(private val width: Int, private val height: Int) {
+open class GraphicLayer(private val width: Int, private val height: Int) {
 
     private val shader: ShaderProgram by lazy { ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) }
     fun init() {
@@ -64,14 +64,13 @@ class Graphics(private val width: Int, private val height: Int) {
         return buffer
     }
 
-    fun drawPixel(x: Int, y: Int, r: Int, g: Int, b: Int, a: Int) {
+    private fun drawPixel(x: Int, y: Int, r: Int, g: Int, b: Int, a: Int) {
         try {
-            if (x < 0 || y < 0 || x > width || y > width) return
+            if (x < 0 || y < 0 || x >= width || y >= width) return
             buffer.put(y * width + x, r or (g shl 8) or (b shl 16) or (a shl 24))
         } catch (e: IndexOutOfBoundsException) {
             throw IndexOutOfBoundsException("Trying to draw to invalid position $x , $y")
         }
-
     }
 
     fun drawSprite(sprite: IntArray, w: Int, x: Int, y: Int, flipHorizontal: Boolean = false) {
@@ -93,24 +92,11 @@ class Graphics(private val width: Int, private val height: Int) {
                 )
             }
         }
-
-//        val skipX = if (x < 0) -x else 0
-//        val saveX = if (x + w > width) w - (width - x) else 0
-//
-//        val skipY = if (y < 0) -y else 0
-//        val saveY = if (y + sprite.size / w > height) (sprite.size / w) - (height - y) else 0
-//
-//        for ((i, lineY) in (y + skipY until ((y + skipY) + sprite.size / w)).withIndex()) {
-//            if (lineY * width + x > 0) {
-//                buffer.position(lineY * width + x + skipX + (skipY * sprite.size / w))
-//                buffer.put(sprite, (i * w) + skipX + (skipY * sprite.size / w), w - skipX - saveX - (skipY * sprite.size / w))
-//            }
-//        }
     }
 
-    fun drawLine(x1: Float, y1: Float,
-                 x2: Float, y2: Float,
-                 r: Int, g: Int, b: Int) {
+    open fun drawLine(x1: Float, y1: Float,
+                      x2: Float, y2: Float,
+                      r: Int, g: Int, b: Int) {
 
         val directionX = x2 - x1
         val directionY = y2 - y1
@@ -130,7 +116,6 @@ class Graphics(private val width: Int, private val height: Int) {
     }
 
     fun render() {
-
         buffer.rewind()
         Gdx.gl.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, width, height,
                 GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, buffer)

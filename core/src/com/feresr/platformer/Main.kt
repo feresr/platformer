@@ -2,11 +2,7 @@ package com.feresr.platformer
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.GL20
-import com.feresr.platformer.Main.Direction.*
-import kotlin.math.abs
-
 
 class Main : ApplicationAdapter() {
 
@@ -21,124 +17,100 @@ class Main : ApplicationAdapter() {
         const val MAX_ACC = 2.5f
     }
 
-    private val foreground = Graphics(SCREEN_WIDTH, SCREEN_HEIGHT)
-    private val background = Graphics(SCREEN_WIDTH, SCREEN_HEIGHT)
     private var t1 = System.currentTimeMillis()
     private var t2 = System.currentTimeMillis()
     private var elapsed = 0L
 
     private lateinit var player: Player
-    private lateinit var map: Map
+    private val enemies: MutableList<Enemy> = mutableListOf()
+    private val map: Map = Map(charArrayOf(
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', 'X', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', 'X', ' ', ' ', ' ', 'X', ' ', ' ', 'O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X',
+            ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '-', '-', '-', '-', 'X', 'X', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', 'X', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', ' ', 'O', 'O', 'O', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', 'X', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            'X', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', 'X'
+    ), 28, 20)
     private lateinit var collisions: Collisions
-    private lateinit var camera: Camera
+    private val camera: Camera = Camera(map.width, map.height, 0f, 0f)
+    private val debugLayer = CameraLayer(camera, SCREEN_WIDTH, SCREEN_HEIGHT)
+    private val foreground = CameraLayer(camera, SCREEN_WIDTH, SCREEN_HEIGHT)
+    private val background = GraphicLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     override fun create() {
-        player = Player(200f, 10f)
-        map = Map(charArrayOf(
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', 'X', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X',
-                ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '-', '-', '-', '-', 'X', 'X', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', 'X', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', ' ', 'O', 'O', 'O', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', 'X', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'O', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                'X', 'X', 'X', 'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X'
-        ), 28, 20)
+        player = Player(10f, 10f)
+        enemies.add(Enemy(TILE_SIZE * 4f, TILE_SIZE * 4f))
+        enemies.add(Enemy(TILE_SIZE * 10f, TILE_SIZE * 4f))
+        enemies.add(Enemy(TILE_SIZE * 4f, TILE_SIZE * 8f))
+        enemies.add(Enemy(TILE_SIZE * 6f, TILE_SIZE * 12f))
+        enemies.add(Enemy(TILE_SIZE * 7f, TILE_SIZE * 12f))
+        enemies.add(Enemy(TILE_SIZE * 14f, TILE_SIZE * 12f))
+        enemies.add(Enemy(TILE_SIZE * 9f, TILE_SIZE * 12f))
+        enemies.add(Enemy(TILE_SIZE * 4f, TILE_SIZE * 12f))
+        enemies.add(Enemy(TILE_SIZE * 2f, TILE_SIZE * 15f))
 
-        camera = Camera(map.width, map.height, 0f, 0f)
-        collisions = Collisions(map)
+        collisions = Collisions(map, debugLayer)
+        map.init()
         foreground.init()
         background.init()
+        if (DEBUG) debugLayer.init()
     }
 
-    enum class Direction { UP, RIGHT, DOWN, LEFT }
-
+    //test delete
+    var gameover = false
 
     override fun render() {
+        if (gameover) return
         t2 = System.currentTimeMillis()
         elapsed = t2 - t1
         t1 = t2
 
-        player.dx *= FRICTION
-        if (abs(player.dx) < PLAYER_ACC / 2f) player.dx = 0f
-        player.dy += GRAVITY
+        player.update(collisions, map)
 
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) player.moveRight()
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) player.moveLeft()
-        if (Gdx.input.isKeyJustPressed(Input.Keys.X)) player.jump(MAX_ACC)
-
-        player.inAir = true
-        if (player.dy > 0) {
-            collisions.check(player, DOWN) {
-                when (it.type) {
-                    'X', '-' -> {
-                        player.y = (((player.y + MAX_ACC) / (TILE_SIZE)).toInt()) * TILE_SIZE.toFloat()
-                        player.inAir = false
-                        player.dy = 0f
-                    }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
-                }
-            }
-        } else if (player.dy < 0) {
-            collisions.check(player, UP) {
-                when (it.type) {
-                    'X' -> {
-                        player.y = (((player.y + MAX_ACC) / (TILE_SIZE)).toInt()) * TILE_SIZE.toFloat()
-                        player.dy = 0f
-                        map.replaceTile(it.x, it.y, ' ')
-                    }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
-                }
-
+        enemies.forEach {
+            it.update(collisions, map)
+            if (collisions.check(player, it, Collisions.Direction.DOWN)) {
+                player.y = it.y - TILE_SIZE
+                player.dy = -1.5f
+                it.dead = true
             }
         }
 
-        collisions.check(player, RIGHT) {
-            when (it.type) {
-                'X' -> {
-                    player.x = (((player.x + TILE_SIZE / 2) / (TILE_SIZE)).toInt()) * TILE_SIZE.toFloat()
-                    player.dx = minOf(0f, player.dx)
-                }
-                'O' -> map.replaceTile(it.x, it.y, ' ')
-            }
-        }
-        collisions.check(player, LEFT) {
-            when (it.type) {
-                'X' -> {
-                    player.x = ((player.x + TILE_SIZE / 2) / (TILE_SIZE)).toInt() * TILE_SIZE.toFloat()
-                    player.dx = maxOf(0f, player.dx)
-                }
-                'O' -> map.replaceTile(it.x, it.y, ' ')
+        enemies.removeAll { it.dead }
+        enemies.forEach {
+            it.draw(foreground)
+            if (collisions.check(it, player, Collisions.Direction.DOWN) ||
+                    collisions.check(it, player, Collisions.Direction.LEFT) ||
+                    collisions.check(it, player, Collisions.Direction.RIGHT)) {
+                player.hurt()
+                gameover = true
             }
         }
 
-        player.dx = player.dx.coerceIn(-MAX_ACC, MAX_ACC)
-        player.dy = player.dy.coerceIn(-MAX_ACC, MAX_ACC)
-
-        player.x += player.dx //* elapsed
-        player.y += player.dy //* elapsed
         camera.follow(player)
         map.draw(background, camera)
-        player.draw(foreground, camera)
+        player.draw(foreground)
 
-        println(Gdx.graphics.framesPerSecond)
+        if (DEBUG) println(Gdx.graphics.framesPerSecond)
         Gdx.gl.glClearColor(.5f, .87f, 1f, 0f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         background.render()
         foreground.render()
-
+        if (DEBUG) debugLayer.render()
     }
 
     override fun dispose() {

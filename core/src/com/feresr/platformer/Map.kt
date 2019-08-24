@@ -9,7 +9,7 @@ class Map(private val tiles: CharArray, val width: Int, val height: Int) {
     private val jumpThrough = IntArray(Main.TILE_SIZE * Main.TILE_SIZE)
     private val coin = IntArray(Main.TILE_SIZE * Main.TILE_SIZE) { (0x22FFFFFF).toInt() }
 
-    init {
+    fun init() {
         val tile = Texture("tile.png").textureData
         tile.prepare()
         val tilePixels = tile.consumePixmap().pixels
@@ -19,16 +19,15 @@ class Map(private val tiles: CharArray, val width: Int, val height: Int) {
         jump.prepare()
         val jumpPixels = jump.consumePixmap().pixels
         jumpPixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(jumpThrough)
-
     }
 
-    fun draw(graphics: Graphics, camera: Camera) {
+    fun draw(graphicLayer: GraphicLayer, camera: Camera) {
         for (y in 0..Main.SCREEN_HEIGHT / Main.TILE_SIZE) {
             for (x in 0..Main.SCREEN_WIDTH / Main.TILE_SIZE) {
                 val tile = ((y + (camera.offsetY / Main.TILE_SIZE).toInt()) * width + x + (camera.offsetX / Main.TILE_SIZE).toInt())
                 if (tile >= tiles.size) continue
                 if (tiles[tile] == 'X') {
-                    graphics.drawSprite(
+                    graphicLayer.drawSprite(
                             block,
                             Main.TILE_SIZE,
                             x * Main.TILE_SIZE - (camera.offsetX % Main.TILE_SIZE).toInt(),
@@ -36,7 +35,7 @@ class Map(private val tiles: CharArray, val width: Int, val height: Int) {
                     )
                 }
                 if (tiles[tile] == 'O') {
-                    graphics.drawSprite(
+                    graphicLayer.drawSprite(
                             if ((System.currentTimeMillis() / 200) % 2 == 0L) coin else block,
                             Main.TILE_SIZE,
                             x * Main.TILE_SIZE - (camera.offsetX % Main.TILE_SIZE).toInt(),
@@ -44,7 +43,7 @@ class Map(private val tiles: CharArray, val width: Int, val height: Int) {
                     )
                 }
                 if (tiles[tile] == '-') {
-                    graphics.drawSprite(
+                    graphicLayer.drawSprite(
                             jumpThrough,
                             Main.TILE_SIZE,
                             x * Main.TILE_SIZE - (camera.offsetX % Main.TILE_SIZE).toInt(),
