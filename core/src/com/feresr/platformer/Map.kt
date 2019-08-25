@@ -81,8 +81,7 @@ class Map(
     }
 
     fun getTile(x: Int, y: Int): Tile {
-        val index = y * (width) + x
-        if (index < 0 || index >= tiles.size) return Tile(x, y, ' ')
+        if (x < 0 || x >= width || y < 0 || y >= height) return Tile(x, y, ' ')
         return Tile(x, y, tiles[y * (width) + x])
     }
 }

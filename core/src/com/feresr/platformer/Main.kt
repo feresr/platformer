@@ -2,6 +2,7 @@ package com.feresr.platformer
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.GL20
 
@@ -27,7 +28,7 @@ class Main : ApplicationAdapter() {
 
     private lateinit var player: Player
 
-    private var currentLevel: Level = Level1()
+    private var currentLevel: Level = MainMenu()
 
     private lateinit var collisions: Collisions
     private val camera: Camera by lazy {
@@ -66,21 +67,43 @@ class Main : ApplicationAdapter() {
         if (assetManager.update()) {
             Gdx.gl.glClearColor(.5f, .87f, 1f, 0f)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-            if (gameover) return
+            if (gameover) {
+                currentLevel = MainMenu()
+                currentLevel.init(assetManager)
+                player.x = 10f
+                player.y = 10f
+                player.dx = 0f
+                player.dy = 0f
+            }
 
             t2 = System.currentTimeMillis()
             elapsed = t2 - t1
             t1 = t2
 
-            player.update(collisions, currentLevel.map)
-
-            currentLevel.enemies.forEach {
-                it.update(collisions, currentLevel.map)
-                if (collisions.check(player, it, Collisions.Direction.DOWN)) {
-                    player.y = it.y - TILE_SIZE
-                    player.dy = -1.5f
-                    it.dead = true
+            if (currentLevel !is MainMenu) {
+                player.update(collisions, currentLevel.map)
+                currentLevel.enemies.forEach {
+                    it.update(collisions, currentLevel.map)
+                    if (collisions.check(player, it, Collisions.Direction.DOWN)) {
+                        player.y = it.y - TILE_SIZE
+                        player.dy = -1.5f
+                        it.dead = true
+                    }
                 }
+            } else {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
+                    currentLevel = Level1()
+                    currentLevel.init(assetManager)
+                    gameover = false
+                }
+                foreground.drawText(
+                        font,
+                        "PRESS 'X' TO START",
+                        (SCREEN_WIDTH / 2),
+                        (SCREEN_HEIGHT / 2),
+                        0x000000,
+                        1
+                )
             }
 
             camera.follow(player)
