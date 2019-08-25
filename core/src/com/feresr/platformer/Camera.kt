@@ -7,7 +7,7 @@ data class Camera(val mapWidth: Int, val mapHeight: Int, var x: Float, var y: Fl
         get() = y - (Main.SCREEN_HEIGHT) / 2
 
     fun follow(player: Player) {
-        x = player.x.coerceIn(Main.SCREEN_WIDTH / 2f, mapWidth * Main.TILE_SIZE - Main.SCREEN_WIDTH / 2f) //maxOf(player.x, )
-        y = player.y.coerceIn(Main.SCREEN_HEIGHT / 2f, mapHeight * Main.TILE_SIZE - Main.SCREEN_HEIGHT / 2f) //maxOf(player.x, )
+        x = (player.x + Main.TILE_SIZE / 2).coerceIn(Main.SCREEN_WIDTH / 2f, mapWidth * Main.TILE_SIZE - Main.SCREEN_WIDTH / 2f) //maxOf(player.x, )
+        y = (player.y + Main.TILE_SIZE / 2).coerceIn(Main.SCREEN_HEIGHT / 2f, mapHeight * Main.TILE_SIZE - Main.SCREEN_HEIGHT / 2f) //maxOf(player.x, )
     }
 }

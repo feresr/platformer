@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.GL20
 class Main : ApplicationAdapter() {
 
     companion object {
-        const val DEBUG = false
+        const val DEBUG = true
         const val SCREEN_WIDTH = 128
         const val SCREEN_HEIGHT = 128
         const val PLAYER_ACC = .048f
@@ -52,10 +52,12 @@ class Main : ApplicationAdapter() {
     private val foreground = CameraLayer(camera, SCREEN_WIDTH, SCREEN_HEIGHT)
     private val background = GraphicLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-    private val font = Font("pico8")
+    private val font = Font("pico8small")
+    private val fontL = Font("pico8")
 
     override fun create() {
         font.init()
+        fontL.init()
         player = Player(10f, 10f)
         enemies.add(Enemy(TILE_SIZE * 4f, TILE_SIZE * 4f))
         enemies.add(Enemy(TILE_SIZE * 10f, TILE_SIZE * 4f))
@@ -113,12 +115,19 @@ class Main : ApplicationAdapter() {
         map.draw(background, camera)
         player.draw(foreground)
 
-        foreground.drawText(font, "\"good\"", player.x.toInt(), player.y.toInt() - TILE_SIZE - 4)
+        foreground.drawText(
+                font,
+                "HELLO WORLD :)",
+                player.x.toInt() + TILE_SIZE / 2,
+                player.y.toInt() - TILE_SIZE - 4,
+                0x70AF0F,
+                1
+        )
         background.render()
         foreground.render()
         if (DEBUG) {
+            background.drawText(fontL, "FPS: ${Gdx.graphics.framesPerSecond}", 30, 0, 1)
             debugLayer.render()
-            println(Gdx.graphics.framesPerSecond)
         }
     }
 

@@ -42,7 +42,7 @@ class Font(private val fontName: String) {
             var toIndex = 0
             for (k in y - offsetY until y + height - offsetY) {
                 for (j in x until x + width) {
-                    val fromIndex = (k * spriteWidth + j)
+                    val fromIndex = k * spriteWidth + j
                     characterSprite[toIndex] = sprite[fromIndex]
                     toIndex++
                 }
