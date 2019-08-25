@@ -12,6 +12,7 @@ class Player(
         dy: Float = 0f,
         dx: Float = 0f,
         val door : (Tile) -> Unit,
+        val hurt : () -> Unit,
         var inAir: Boolean = true
 ) : GameObject(x, y, dx, dy) {
     private var flipHorizontal: Boolean = false
@@ -54,6 +55,7 @@ class Player(
                         dy = 0f
                     }
                     'O' -> map.replaceTile(it.x, it.y, ' ')
+                    'H' -> hurt()
                 }
             }
         } else if (dy < 0) {
@@ -130,7 +132,4 @@ class Player(
         dx += Main.PLAYER_ACC
     }
 
-    fun hurt() {
-
-    }
 }

@@ -12,12 +12,14 @@ class Map(
     private val jumpThrough = IntArray(Main.TILE_SIZE * Main.TILE_SIZE)
     private val coin = IntArray(Main.TILE_SIZE * Main.TILE_SIZE) { (0x22FFFFFF).toInt() }
     private val door = IntArray(Main.TILE_SIZE * Main.TILE_SIZE) { (0x22FFFFFF).toInt() }
+    private val spikes = IntArray(Main.TILE_SIZE * Main.TILE_SIZE) { (0x22FFFFFF).toInt() }
 
     fun init(assetManager: AssetManager) {
         assetManager.load("tile.png", Pixmap::class.java)
         assetManager.load("jump.png", Pixmap::class.java)
         assetManager.load("coin.png", Pixmap::class.java)
         assetManager.load("door.png", Pixmap::class.java)
+        assetManager.load("spikes.png", Pixmap::class.java)
         assetManager.finishLoading()
 
         val tilePixels = assetManager.get("tile.png", Pixmap::class.java).pixels
@@ -31,6 +33,9 @@ class Map(
 
         val doorPixels = assetManager.get("door.png", Pixmap::class.java).pixels
         doorPixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(door)
+
+        val spikesPixels = assetManager.get("spikes.png", Pixmap::class.java).pixels
+        spikesPixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(spikes)
     }
 
     fun draw(graphicLayer: GraphicLayer, camera: Camera) {
@@ -38,7 +43,7 @@ class Map(
             for (x in 0..Main.SCREEN_WIDTH / Main.TILE_SIZE) {
                 val tile = ((y + (camera.offsetY / Main.TILE_SIZE).toInt()) * width + x + (camera.offsetX / Main.TILE_SIZE).toInt())
                 if (tile >= tiles.size) continue
-                if (tiles[tile] == 'X') {
+                if (tiles[tile] == 'X' || tiles[tile] == 'H') {
                     graphicLayer.drawSprite(
                             block,
                             Main.TILE_SIZE,
@@ -67,6 +72,14 @@ class Map(
                 if (tiles[tile] == 'D') {
                     graphicLayer.drawSprite(
                             door,
+                            Main.TILE_SIZE,
+                            x * Main.TILE_SIZE - (camera.offsetX % Main.TILE_SIZE).toInt(),
+                            y * Main.TILE_SIZE - (camera.offsetY % Main.TILE_SIZE).toInt()
+                    )
+                }
+                if (tiles[tile] == 'M') {
+                    graphicLayer.drawSprite(
+                            spikes,
                             Main.TILE_SIZE,
                             x * Main.TILE_SIZE - (camera.offsetX % Main.TILE_SIZE).toInt(),
                             y * Main.TILE_SIZE - (camera.offsetY % Main.TILE_SIZE).toInt()

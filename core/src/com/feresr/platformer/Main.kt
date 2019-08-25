@@ -45,14 +45,8 @@ class Main : ApplicationAdapter() {
         font.init(assetManager)
         fontL.init(assetManager)
         player = Player(10f, 10f, door = {
-            player.x = 10f
-            player.y = 10f
-            val nextLevel = if (currentLevel is Level2) Level1() else Level2()
-            nextLevel.let {
-                currentLevel = it
-                currentLevel.init(assetManager)
-            }
-        })
+            changeLevel(if (currentLevel is Level2) Level1() else Level2())
+        }, hurt = { gameover = true })
         collisions = Collisions({ x, y -> currentLevel.map.getTile(x, y) }, debugLayer)
         currentLevel.init(assetManager)
         foreground.init()
@@ -68,12 +62,7 @@ class Main : ApplicationAdapter() {
             Gdx.gl.glClearColor(.5f, .87f, 1f, 0f)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
             if (gameover) {
-                currentLevel = MainMenu()
-                currentLevel.init(assetManager)
-                player.x = 10f
-                player.y = 10f
-                player.dx = 0f
-                player.dy = 0f
+                changeLevel(MainMenu())
             }
 
             t2 = System.currentTimeMillis()
@@ -92,18 +81,19 @@ class Main : ApplicationAdapter() {
                 }
             } else {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
-                    currentLevel = Level1()
-                    currentLevel.init(assetManager)
-                    gameover = false
+                    changeLevel(Level1())
                 }
-                foreground.drawText(
-                        font,
-                        "PRESS 'X' TO START",
-                        (SCREEN_WIDTH / 2),
-                        (SCREEN_HEIGHT / 2),
-                        0x000000,
-                        1
-                )
+
+                if ((System.currentTimeMillis() / 320) % 2 == 0L) {
+                    foreground.drawText(
+                            font,
+                            "PRESS 'X' TO START",
+                            (SCREEN_WIDTH / 2),
+                            (SCREEN_HEIGHT / 2),
+                            0x000000,
+                            1
+                    )
+                }
             }
 
             camera.follow(player)
@@ -114,7 +104,6 @@ class Main : ApplicationAdapter() {
                         collisions.check(it, player, Collisions.Direction.LEFT) ||
                         collisions.check(it, player, Collisions.Direction.RIGHT)) {
                     player.hurt()
-                    gameover = true
                 }
             }
 
@@ -138,6 +127,17 @@ class Main : ApplicationAdapter() {
         } else {
             //TODO show loading assets progress manager.getProgress()
         }
+    }
+
+
+    private fun changeLevel(level: Level) {
+        currentLevel = level
+        currentLevel.init(assetManager)
+        gameover = false
+        player.x = 10f
+        player.y = 10f
+        player.dx = 0f
+        player.dy = 0f
     }
 
     override fun dispose() {
