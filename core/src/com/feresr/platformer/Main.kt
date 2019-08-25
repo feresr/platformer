@@ -45,7 +45,9 @@ class Main : ApplicationAdapter() {
         font.init(assetManager)
         fontL.init(assetManager)
         player = Player(10f, 10f, door = {
-            changeLevel(if (currentLevel is Level2) Level1() else Level2())
+            if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+                changeLevel(if (currentLevel is Level2) Level1() else Level2())
+            }
         }, hurt = { gameover = true })
         collisions = Collisions({ x, y -> currentLevel.map.getTile(x, y) }, debugLayer)
         currentLevel.init(assetManager)
@@ -61,38 +63,47 @@ class Main : ApplicationAdapter() {
         if (assetManager.update()) {
             Gdx.gl.glClearColor(.5f, .87f, 1f, 0f)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-            if (gameover) {
-                changeLevel(MainMenu())
-            }
+            if (gameover) changeLevel(GameOver())
 
             t2 = System.currentTimeMillis()
             elapsed = t2 - t1
             t1 = t2
 
-            if (currentLevel !is MainMenu) {
-                player.update(collisions, currentLevel.map)
-                currentLevel.enemies.forEach {
-                    it.update(collisions, currentLevel.map)
-                    if (collisions.check(player, it, Collisions.Direction.DOWN)) {
-                        player.y = it.y - TILE_SIZE
-                        player.dy = -1.5f
-                        it.dead = true
-                    }
-                }
-            } else {
-                if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
-                    changeLevel(Level1())
-                }
-
-                if ((System.currentTimeMillis() / 320) % 2 == 0L) {
+            when (currentLevel) {
+                is GameOver -> {
                     foreground.drawText(
                             font,
-                            "PRESS 'X' TO START",
+                            "GAME OVER",
                             (SCREEN_WIDTH / 2),
                             (SCREEN_HEIGHT / 2),
                             0x000000,
                             1
                     )
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.X)) changeLevel(MainMenu())
+                }
+                is MainMenu -> {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.X)) changeLevel(Level1())
+                    if ((System.currentTimeMillis() / 320) % 2 == 0L) {
+                        foreground.drawText(
+                                font,
+                                "PRESS 'X' TO START",
+                                (SCREEN_WIDTH / 2),
+                                (SCREEN_HEIGHT / 2),
+                                0x000000,
+                                1
+                        )
+                    }
+                }
+                else -> {
+                    player.update(collisions, currentLevel.map)
+                    currentLevel.enemies.forEach {
+                        it.update(collisions, currentLevel.map)
+                        if (collisions.check(player, it, Collisions.Direction.DOWN)) {
+                            player.y = it.y - TILE_SIZE
+                            player.dy = -1.5f
+                            it.dead = true
+                        }
+                    }
                 }
             }
 
@@ -100,15 +111,17 @@ class Main : ApplicationAdapter() {
             currentLevel.enemies.removeAll { it.dead }
             currentLevel.enemies.forEach {
                 it.draw(foreground)
-                if (collisions.check(it, player, Collisions.Direction.DOWN) ||
+                if (
+                        collisions.check(it, player, Collisions.Direction.DOWN) ||
                         collisions.check(it, player, Collisions.Direction.LEFT) ||
-                        collisions.check(it, player, Collisions.Direction.RIGHT)) {
+                        collisions.check(it, player, Collisions.Direction.RIGHT)
+                ) {
                     player.hurt()
                 }
             }
 
             currentLevel.map.draw(background, camera)
-            player.draw(foreground)
+            if (currentLevel !is GameOver) player.draw(foreground)
 
             foreground.drawText(
                     font,
