@@ -73,7 +73,7 @@ open class GraphicLayer(private val width: Int, private val height: Int) {
         }
     }
 
-    fun drawSprite(sprite: IntArray, w: Int, x: Int, y: Int, flipHorizontal: Boolean = false) {
+    open fun drawSprite(sprite: IntArray, w: Int, x: Int, y: Int, flipHorizontal: Boolean = false) {
 
         val h = sprite.size / w
 
@@ -125,6 +125,15 @@ open class GraphicLayer(private val width: Int, private val height: Int) {
 
     fun dispose() {
         shader.dispose()
+    }
+
+    fun drawText(font: Font, string: String, x: Int, y: Int, characterSpacing: Int = 2) {
+        val characters = string.map { font.getCharacter(it) }
+        var nextCharacterX = x - characters.map { it.width + characterSpacing }.sum() / 2
+        characters.forEach {
+            drawSprite(it.pixels, it.width, nextCharacterX, y)
+            nextCharacterX += it.width + characterSpacing
+        }
     }
 
     companion object {

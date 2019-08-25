@@ -7,7 +7,7 @@ class Enemy(
         x: Float,
         y: Float,
         dy: Float = 0f,
-        var dead : Boolean = false
+        var dead: Boolean = false
 ) : GameObject(x, y, dy, .5f) {
 
     private var sprite: IntArray
@@ -29,7 +29,6 @@ class Enemy(
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         dy = 0f
                     }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
                 }
             }
         } else if (dy < 0) {
@@ -40,7 +39,6 @@ class Enemy(
                         dy = 0f
                         map.replaceTile(it.x, it.y, ' ')
                     }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
                 }
 
             }
@@ -52,7 +50,6 @@ class Enemy(
                     x = (((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                     dx *= -1
                 }
-                'O' -> map.replaceTile(it.x, it.y, ' ')
             }
         }
         collisions.check(this, Collisions.Direction.LEFT) {
@@ -61,7 +58,6 @@ class Enemy(
                     x = ((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt() * Main.TILE_SIZE.toFloat()
                     dx *= -1
                 }
-                'O' -> map.replaceTile(it.x, it.y, ' ')
             }
         }
 

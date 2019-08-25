@@ -16,4 +16,10 @@ class CameraLayer(private val camera: Camera, width: Int, height: Int) : Graphic
                 x2 - camera.offsetX,
                 y2 - camera.offsetY, r, g, b)
     }
+
+
+    override fun drawSprite(sprite: IntArray, w: Int, x: Int, y: Int, flipHorizontal: Boolean) {
+        super.drawSprite(sprite, w, x - camera.offsetX.toInt(),
+                y - camera.offsetY.toInt(), flipHorizontal)
+    }
 }
