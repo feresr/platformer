@@ -120,6 +120,12 @@ open class GraphicLayer(private val width: Int, private val height: Int) {
         Gdx.gl.glTexSubImage2D(GL20.GL_TEXTURE_2D, 0, 0, 0, width, height,
                 GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, buffer)
         Gdx.gl.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, 4)
+        if (Main.DEBUG) {
+            val error = Gdx.gl.glGetError()
+            if (error != 0) {
+                println(error)
+            }
+        }
         buffer.put(clear)
     }
 

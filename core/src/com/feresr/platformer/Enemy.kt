@@ -1,6 +1,7 @@
 package com.feresr.platformer
 
-import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.graphics.Pixmap
 import java.nio.ByteOrder
 
 class Enemy(
@@ -10,12 +11,13 @@ class Enemy(
         var dead: Boolean = false
 ) : GameObject(x, y, dy, .5f) {
 
-    private var sprite: IntArray
+    private lateinit var sprite: IntArray
 
-    init {
-        val texture = Texture("hero2.png")
-        texture.textureData.prepare()
-        val pixels = texture.textureData.consumePixmap().pixels
+    fun init(assetManager: AssetManager) {
+        assetManager.load("hero2.png", Pixmap::class.java)
+        assetManager.finishLoading()
+
+        val pixels = assetManager.get("hero2.png", Pixmap::class.java).pixels
         sprite = IntArray(pixels.asIntBuffer().remaining())
         pixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(sprite)
     }

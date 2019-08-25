@@ -11,6 +11,7 @@ class Player(
         y: Float,
         dy: Float = 0f,
         dx: Float = 0f,
+        val door : (Tile) -> Unit,
         var inAir: Boolean = true
 ) : GameObject(x, y, dx, dy) {
     private var flipHorizontal: Boolean = false
@@ -75,6 +76,7 @@ class Player(
                     x = (((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                     dx = minOf(0f, dx)
                 }
+                'D' -> door(it)
                 'O' -> map.replaceTile(it.x, it.y, ' ')
             }
         }
@@ -84,6 +86,7 @@ class Player(
                     x = ((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt() * Main.TILE_SIZE.toFloat()
                     dx = maxOf(0f, dx)
                 }
+                'D' -> door(it)
                 'O' -> map.replaceTile(it.x, it.y, ' ')
             }
         }

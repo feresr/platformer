@@ -1,7 +1,8 @@
 package com.feresr.platformer
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.graphics.Pixmap
 import org.w3c.dom.Element
 import java.nio.ByteOrder
 import javax.xml.parsers.DocumentBuilderFactory
@@ -12,13 +13,13 @@ class Font(private val fontName: String) {
 
     class Character(val pixels: IntArray, val width: Int, val height: Int)
 
-    fun init() {
-        val texture = Texture("$fontName.png")
-        texture.textureData.prepare()
+    fun init(assetManager: AssetManager) {
+        assetManager.load("$fontName.png", Pixmap::class.java)
+        assetManager.finishLoading()
 
-        val sprite = texture.textureData.consumePixmap().pixels
-                .order(ByteOrder.LITTLE_ENDIAN).asIntBuffer()
-        val spriteWidth = texture.width
+        val pixmap = assetManager.get("$fontName.png", Pixmap::class.java)
+        val sprite = pixmap.pixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer()
+        val spriteWidth = pixmap.width
 
         val font = Gdx.files.internal("data/$fontName.xml").file()
 

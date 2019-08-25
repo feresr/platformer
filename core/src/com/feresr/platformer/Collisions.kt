@@ -1,6 +1,6 @@
 package com.feresr.platformer
 
-class Collisions(private val map: Map, private val graphicLayer: GraphicLayer) {
+class Collisions(private val getTile: (x: Int, y: Int) -> Tile, private val graphicLayer: GraphicLayer) {
     private val tiles = mutableSetOf<Tile>()
 
     enum class Direction { UP, RIGHT, DOWN, LEFT }
@@ -132,10 +132,10 @@ class Collisions(private val map: Map, private val graphicLayer: GraphicLayer) {
 
         with(tiles) {
             clear()
-            add(Tile(x1t, y1t, map.getTile(x1t, y1t)))
-            add(Tile(x1t, y2t, map.getTile(x1t, y2t)))
-            add(Tile(x2t, y1t, map.getTile(x2t, y1t)))
-            add(Tile(x2t, y2t, map.getTile(x2t, y2t)))
+            add(getTile(x1t, y1t))
+            add(getTile(x1t, y2t))
+            add(getTile(x2t, y1t))
+            add(getTile(x2t, y2t))
             forEach { action(it) }
         }
     }
