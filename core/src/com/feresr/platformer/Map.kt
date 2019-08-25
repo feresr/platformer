@@ -55,7 +55,6 @@ class Map(
                                 y * Main.TILE_SIZE - (camera.offsetY % Main.TILE_SIZE).toInt()
                         )
                     }
-
                 }
                 if (tiles[tile] == '-') {
                     graphicLayer.drawSprite(

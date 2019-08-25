@@ -30,7 +30,9 @@ class Main : ApplicationAdapter() {
     private var currentLevel: Level = Level1()
 
     private lateinit var collisions: Collisions
-    private val camera: Camera by lazy { Camera(currentLevel.map.width, currentLevel.map.height, 0f, 0f) }
+    private val camera: Camera by lazy {
+        Camera({ currentLevel.map.width }, { currentLevel.map.height }, 0f, 0f)
+    }
     private val debugLayer = CameraLayer(camera, SCREEN_WIDTH, SCREEN_HEIGHT)
     private val foreground = CameraLayer(camera, SCREEN_WIDTH, SCREEN_HEIGHT)
     private val background = GraphicLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -58,7 +60,7 @@ class Main : ApplicationAdapter() {
     }
 
     //test delete
-    var gameover = false
+    private var gameover = false
 
     override fun render() {
         if (assetManager.update()) {
@@ -98,10 +100,10 @@ class Main : ApplicationAdapter() {
 
             foreground.drawText(
                     font,
-                    "HELLO WORLD :)",
+                    "HI THERE!",
                     player.x.toInt() + TILE_SIZE / 2,
                     player.y.toInt() - TILE_SIZE - 4,
-                    0x70AF0F,
+                    0x70FFFF,
                     1
             )
             background.render()
