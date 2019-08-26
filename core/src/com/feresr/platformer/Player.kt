@@ -2,7 +2,9 @@ package com.feresr.platformer
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.graphics.Pixmap
 import java.nio.ByteOrder
 import kotlin.math.abs
 
@@ -11,29 +13,31 @@ class Player(
         y: Float,
         dy: Float = 0f,
         dx: Float = 0f,
-        val door : (Tile) -> Unit,
-        val hurt : () -> Unit,
+        val door: (Tile) -> Unit,
+        val hurt: () -> Unit,
         var inAir: Boolean = true
 ) : GameObject(x, y, dx, dy) {
     private var flipHorizontal: Boolean = false
-    private var sprite: IntArray
-    private var sprite2: IntArray
-    private var current: IntArray
+    private lateinit var sprite: IntArray
+    private lateinit var sprite2: IntArray
+    private lateinit var current: IntArray
 
-    init {
-        val texture = Texture("hero.png")
-        texture.textureData.prepare()
-        val pixels = texture.textureData.consumePixmap().pixels
+    private lateinit var sound: Sound
+
+    fun init(assetManager: AssetManager) {
+        assetManager.load("hero.png", Pixmap::class.java)
+        assetManager.load("hero2.png", Pixmap::class.java)
+        assetManager.finishLoading()
+
+        val pixels = assetManager.get("hero.png", Pixmap::class.java).pixels
         sprite = IntArray(pixels.asIntBuffer().remaining())
         pixels.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(sprite)
 
-        val texture2 = Texture("hero2.png")
-        texture2.textureData.prepare()
-        val pixels2 = texture2.textureData.consumePixmap().pixels
-        sprite2 = IntArray(pixels2.asIntBuffer().remaining())
-
-        current = sprite
+        val pixels2 = assetManager.get("hero2.png", Pixmap::class.java).pixels
+        sprite2 = IntArray(pixels.asIntBuffer().remaining())
         pixels2.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(sprite2)
+        current = sprite
+        sound = Gdx.audio.newSound(Gdx.files.internal("jump.wav"))
     }
 
     fun update(collisions: Collisions, map: Map) {
@@ -65,6 +69,7 @@ class Player(
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         dy = 0f
                         map.replaceTile(it.x, it.y, ' ')
+                        sound.stop()
                     }
                     'O' -> map.replaceTile(it.x, it.y, ' ')
                 }
@@ -98,6 +103,9 @@ class Player(
 
         x += dx //* elapsed
         y += dy //* elapsed
+
+        x = x.coerceIn(0f, map.width.toFloat() * Main.TILE_SIZE - Main.TILE_SIZE)
+        if (y >= map.height.toFloat() * Main.TILE_SIZE) hurt()
     }
 
     fun draw(layer: CameraLayer) {
@@ -109,6 +117,7 @@ class Player(
         if (!inAir) {
             dy -= amount
             inAir = true
+            sound.play(.2f)
         }
     }
 

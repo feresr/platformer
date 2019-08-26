@@ -11,7 +11,7 @@ class Main : ApplicationAdapter() {
 
     companion object {
         const val DEBUG = false
-        const val SCREEN_WIDTH = 128
+        const val SCREEN_WIDTH = 208
         const val SCREEN_HEIGHT = 128
         const val PLAYER_ACC = .048f
         const val TILE_SIZE = 8
@@ -46,9 +46,10 @@ class Main : ApplicationAdapter() {
         fontL.init(assetManager)
         player = Player(10f, 10f, door = {
             if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-                changeLevel(if (currentLevel is Level2) Level1() else Level2())
+                changeLevel(if (currentLevel is Level2) Level3() else Level2())
             }
         }, hurt = { gameover = true })
+        player.init(assetManager)
         collisions = Collisions({ x, y -> currentLevel.map.getTile(x, y) }, debugLayer)
         currentLevel.init(assetManager)
         foreground.init()

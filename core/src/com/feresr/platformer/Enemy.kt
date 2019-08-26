@@ -68,6 +68,9 @@ class Enemy(
 
         x += dx //* elapsed
         y += dy //* elapsed
+
+        if (x + Main.TILE_SIZE < 0 || x > map.width.toFloat() * Main.TILE_SIZE) dead = true
+        if (y >= map.height.toFloat() * Main.TILE_SIZE) dead = true
     }
 
     fun draw(graphicLayer: CameraLayer) {
