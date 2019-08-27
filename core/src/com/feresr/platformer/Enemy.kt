@@ -26,20 +26,24 @@ class Enemy(
         dy += Main.GRAVITY
         if (dy > 0) {
             collisions.check(this, Collisions.Direction.DOWN) {
-                when (it.type) {
-                    'X', '-' -> {
+                when (Map.Tiles.getByType(it.type)) {
+                    Map.Tiles.Solid, Map.Tiles.Jump -> {
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         dy = 0f
+                    }
+                    else -> {
                     }
                 }
             }
         } else if (dy < 0) {
             collisions.check(this, Collisions.Direction.UP) {
-                when (it.type) {
-                    'X' -> {
+                when (Map.Tiles.getByType(it.type)) {
+                    Map.Tiles.Solid -> {
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         dy = 0f
-                        map.replaceTile(it.x, it.y, ' ')
+                        map.replaceTile(Tile(it.x, it.y, 0))
+                    }
+                    else -> {
                     }
                 }
 
@@ -47,18 +51,22 @@ class Enemy(
         }
 
         collisions.check(this, Collisions.Direction.RIGHT) {
-            when (it.type) {
-                'X' -> {
+            when (Map.Tiles.getByType(it.type)) {
+                Map.Tiles.Solid -> {
                     x = (((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                     dx *= -1
+                }
+                else -> {
                 }
             }
         }
         collisions.check(this, Collisions.Direction.LEFT) {
-            when (it.type) {
-                'X' -> {
+            when (Map.Tiles.getByType(it.type)) {
+                Map.Tiles.Solid -> {
                     x = ((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt() * Main.TILE_SIZE.toFloat()
                     dx *= -1
+                }
+                else -> {
                 }
             }
         }

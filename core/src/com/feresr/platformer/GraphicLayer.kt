@@ -137,7 +137,6 @@ open class GraphicLayer(private val width: Int, private val height: Int) {
         val characters = string.map { font.getCharacter(it) }
         var nextCharacterX = x - characters.map { it.width + characterSpacing }.sum() / 2
         characters.forEach {
-
             for (i in 0 until it.pixels.size) {
                 it.pixels[i] = (it.pixels[i] and 0xFF000000.toInt()) or (color and 0x00FFFFFF)
             }

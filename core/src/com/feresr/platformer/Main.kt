@@ -28,7 +28,7 @@ class Main : ApplicationAdapter() {
 
     private lateinit var player: Player
 
-    private var currentLevel: Level = MainMenu()
+    private lateinit var currentLevel: Level
 
     private lateinit var collisions: Collisions
     private val camera: Camera by lazy {
@@ -46,11 +46,12 @@ class Main : ApplicationAdapter() {
         fontL.init(assetManager)
         player = Player(10f, 10f, door = {
             if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-                changeLevel(if (currentLevel is Level2) Level3() else Level2())
+                changeLevel(if (currentLevel.id == 2) Level.build(1) else Level.build(2))
             }
         }, hurt = { gameover = true })
         player.init(assetManager)
         collisions = Collisions({ x, y -> currentLevel.map.getTile(x, y) }, debugLayer)
+        currentLevel = MainMenu()
         currentLevel.init(assetManager)
         foreground.init()
         background.init()
@@ -64,16 +65,20 @@ class Main : ApplicationAdapter() {
         if (assetManager.update()) {
             Gdx.gl.glClearColor(.5f, .87f, 1f, 0f)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-            if (gameover) changeLevel(GameOver())
+            if (gameover) {
+                camera.x = 0f
+                camera.y = 0f
+                changeLevel(GameOver())
+            }
 
             t2 = System.currentTimeMillis()
             elapsed = t2 - t1
             t1 = t2
 
             when (currentLevel) {
-                is GameOver -> {
+                 is GameOver -> {
                     foreground.drawText(
-                            font,
+                            fontL,
                             "GAME OVER",
                             (SCREEN_WIDTH / 2),
                             (SCREEN_HEIGHT / 2),
@@ -83,7 +88,7 @@ class Main : ApplicationAdapter() {
                     if (Gdx.input.isKeyJustPressed(Input.Keys.X)) changeLevel(MainMenu())
                 }
                 is MainMenu -> {
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.X)) changeLevel(Level1())
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.X)) changeLevel(Level.build(1))
                     if ((System.currentTimeMillis() / 320) % 2 == 0L) {
                         foreground.drawText(
                                 font,

@@ -52,49 +52,54 @@ class Player(
         inAir = true
         if (dy > 0) {
             collisions.check(this, Collisions.Direction.DOWN) {
-                when (it.type) {
-                    'X', '-' -> {
+                when (Map.Tiles.getByType(it.type)) {
+                    Map.Tiles.Solid,
+                    Map.Tiles.Jump -> {
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         inAir = false
                         dy = 0f
                     }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
-                    'H' -> hurt()
+                    Map.Tiles.Coin -> map.replaceTile(Tile(it.x, it.y, 0))
+                    Map.Tiles.Spikes -> hurt()
+                    else -> {}
                 }
             }
         } else if (dy < 0) {
             collisions.check(this, Collisions.Direction.UP) {
-                when (it.type) {
-                    'X' -> {
+                when (Map.Tiles.getByType(it.type)) {
+                    Map.Tiles.Solid -> {
                         y = (((y + Main.MAX_ACC) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                         dy = 0f
-                        map.replaceTile(it.x, it.y, ' ')
+                        map.replaceTile(Tile(it.x, it.y, 0))
                         sound.stop()
                     }
-                    'O' -> map.replaceTile(it.x, it.y, ' ')
+                    Map.Tiles.Coin -> map.replaceTile(Tile(it.x, it.y, 0))
+                    else -> {}
                 }
 
             }
         }
 
         collisions.check(this, Collisions.Direction.RIGHT) {
-            when (it.type) {
-                'X' -> {
+            when (Map.Tiles.getByType(it.type)) {
+                Map.Tiles.Solid -> {
                     x = (((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt()) * Main.TILE_SIZE.toFloat()
                     dx = minOf(0f, dx)
                 }
-                'D' -> door(it)
-                'O' -> map.replaceTile(it.x, it.y, ' ')
+                Map.Tiles.Door -> door(it)
+                Map.Tiles.Coin -> map.replaceTile(Tile(it.x, it.y, 0))
+                else -> {}
             }
         }
         collisions.check(this, Collisions.Direction.LEFT) {
-            when (it.type) {
-                'X' -> {
+            when (Map.Tiles.getByType(it.type)) {
+                Map.Tiles.Solid ->{
                     x = ((x + Main.TILE_SIZE / 2) / (Main.TILE_SIZE)).toInt() * Main.TILE_SIZE.toFloat()
                     dx = maxOf(0f, dx)
                 }
-                'D' -> door(it)
-                'O' -> map.replaceTile(it.x, it.y, ' ')
+                Map.Tiles.Door -> door(it)
+                Map.Tiles.Coin -> map.replaceTile(Tile(it.x, it.y, 0))
+                else -> {}
             }
         }
 
